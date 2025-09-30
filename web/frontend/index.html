@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Call Quality Audit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Call Quality Audit</h1>
+        <p>Загрузите аудиофайл звонка и получите отчёт по качеству диалога.</p>
+      </div>
+      <a class="docs-link" href="/docs/ARCHITECTURE.md" target="_blank" rel="noreferrer"
+        >Документация</a
+      >
+    </header>
+
+    <main class="layout">
+      <section class="panel" aria-labelledby="upload-title">
+        <div class="panel-header">
+          <h2 id="upload-title">Новый анализ</h2>
+          <p class="panel-subtitle">
+            Поддерживаются WAV/MP3. Файл обрабатывается офлайн, результат сохраняется в артефактах.
+          </p>
+        </div>
+        <form id="analyze-form" class="upload-form">
+          <label class="file-drop" for="audio-input">
+            <input id="audio-input" name="audio" type="file" accept="audio/*" required />
+            <span class="file-drop__icon">⬆️</span>
+            <span class="file-drop__text">Перетащите файл или выберите вручную</span>
+            <span class="file-drop__hint">Максимальный размер 100 МБ</span>
+          </label>
+          <label class="consent">
+            <input id="consent-input" type="checkbox" name="consent" />
+            <span>У меня есть согласие клиента на обработку</span>
+          </label>
+          <button id="submit-btn" type="submit" class="primary-btn">Запустить анализ</button>
+        </form>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </section>
+
+      <section id="results" class="panel" aria-live="polite" hidden>
+        <div class="panel-header">
+          <h2>Результаты</h2>
+          <p class="panel-subtitle">Сводка оценки звонка и расшифровка диалога.</p>
+        </div>
+
+        <div class="summary" id="summary"></div>
+
+        <div class="grid">
+          <div>
+            <h3>Оценки</h3>
+            <div class="score-card" id="score-card"></div>
+          </div>
+          <div>
+            <h3>Операционные метрики</h3>
+            <dl class="metrics" id="operational"></dl>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div>
+            <h3>Чек-лист</h3>
+            <div id="checklist" class="list"></div>
+          </div>
+          <div>
+            <h3>Хайлайты</h3>
+            <div id="highlights" class="list"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="transcript-header">
+            <h3>Транскрипт</h3>
+            <button id="download-json" type="button" class="secondary-btn">Скачать JSON</button>
+            <button id="open-html" type="button" class="secondary-btn">Открыть HTML</button>
+          </div>
+          <div id="transcript" class="transcript"></div>
+        </div>
+      </section>
+    </main>
+
+    <template id="checklist-item-template">
+      <article class="card"></article>
+    </template>
+
+    <template id="highlight-item-template">
+      <article class="card card--highlight"></article>
+    </template>
+
+    <template id="transcript-row-template">
+      <div class="transcript-row">
+        <div class="transcript-meta"></div>
+        <div class="transcript-text"></div>
+      </div>
+    </template>
+
+    <script type="module" src="/static/app.js"></script>
+  </body>
+</html>

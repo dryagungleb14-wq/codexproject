@@ -5,7 +5,7 @@ import os
 from typing import Any, Dict
 
 from google import genai
-from google.genai.types import Content, Part, Schema, SchemaType
+from google.genai.types import Content, Part, Schema
 
 from utils.logging import log_json
 
@@ -17,34 +17,34 @@ SYSTEM = (
 )
 
 score_schema = Schema(
-    type=SchemaType.OBJECT,
+    type="object",
     properties={
-        "empathy": Schema(type=SchemaType.NUMBER),
-        "compliance": Schema(type=SchemaType.NUMBER),
-        "structure": Schema(type=SchemaType.NUMBER),
+        "empathy": Schema(type="number"),
+        "compliance": Schema(type="number"),
+        "structure": Schema(type="number"),
         "checklist": Schema(
-            type=SchemaType.ARRAY,
+            type="array",
             items=Schema(
-                type=SchemaType.OBJECT,
+                type="object",
                 properties={
-                    "id": Schema(type=SchemaType.STRING),
-                    "passed": Schema(type=SchemaType.BOOLEAN),
-                    "score": Schema(type=SchemaType.NUMBER),
-                    "max": Schema(type=SchemaType.NUMBER),
-                    "reason": Schema(type=SchemaType.STRING),
-                    "evidence": Schema(type=SchemaType.STRING),
-                    "ts": Schema(type=SchemaType.STRING),
+                    "id": Schema(type="string"),
+                    "passed": Schema(type="boolean"),
+                    "score": Schema(type="number"),
+                    "max": Schema(type="number"),
+                    "reason": Schema(type="string"),
+                    "evidence": Schema(type="string"),
+                    "ts": Schema(type="string"),
                 },
             ),
         ),
         "highlights": Schema(
-            type=SchemaType.ARRAY,
+            type="array",
             items=Schema(
-                type=SchemaType.OBJECT,
+                type="object",
                 properties={
-                    "type": Schema(type=SchemaType.STRING),
-                    "quote": Schema(type=SchemaType.STRING),
-                    "ts": Schema(type=SchemaType.STRING),
+                    "type": Schema(type="string"),
+                    "quote": Schema(type="string"),
+                    "ts": Schema(type="string"),
                 },
             ),
         ),
