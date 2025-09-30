@@ -3,108 +3,28 @@
 from __future__ import annotations
 
 import argparse
-import json
-import os
 from pathlib import Path
-from typing import Any, Dict
 
-from asr.transcriber import WhisperTranscriber
-from config.settings import get_settings
-from diarization.diarizer import assign_roles
-from ingest.audio_processor import generate_call_id, normalise_audio
-from nlp.llm_evaluator import evaluate_transcript
-from scoring.metrics import build_report
-from utils.logging import RequestContext, log_json
-
-
-def write_json(path: Path, payload: Dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+from pipeline import run_pipeline
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Analyze a call recording")
     parser.add_argument("audio", type=Path, help="Path to audio file")
-    parser.add_argument("--output", type=Path, default=Path("artifacts"), help="Directory for artifacts")
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("artifacts"),
+        help="Directory where pipeline artefacts will be stored",
+    )
     parser.add_argument("--consent", action="store_true", help="Consent flag for the call")
     args = parser.parse_args()
 
-    settings = get_settings()
-    call_id = generate_call_id()
-    context = RequestContext(request_id=call_id, step="pipeline")
+    result = run_pipeline(args.audio, artifacts_root=args.output, consent=args.consent)
 
-    audio_dir = args.output / call_id
-    normalised_audio, duration_sec = normalise_audio(args.audio, audio_dir)
-
-    transcriber = WhisperTranscriber()
-    transcript_result = transcriber.transcribe(normalised_audio)
-
-    diarization_result = assign_roles(transcript_result.segments)
-
-    transcript_lines = []
-    for seg in diarization_result.segments:
-        ts_start = f"{seg.start:0>4.0f}"
-        transcript_lines.append(f"[{seg.start:.2f}-{seg.end:.2f}] {seg.speaker}: {seg.text}")
-    transcript_blob = "\n".join(transcript_lines)
-
-    try:
-        llm_payload = evaluate_transcript(transcript_blob)
-    except Exception as exc:  # noqa: BLE001
-        log_json("llm_error", error=str(exc))
-        llm_payload = {
-            "empathy": 0.0,
-            "compliance": 0.0,
-            "structure": 0.0,
-            "checklist": [],
-            "highlights": [],
-            "partial": True,
-        }
-
-    report = build_report(
-        call_id=call_id,
-        language=transcript_result.language,
-        duration_sec=duration_sec,
-        llm_payload=llm_payload,
-        segments=diarization_result.segments,
-    )
-
-    output_dir = settings.artifacts_dir / call_id
-    json_path = output_dir / "report.json"
-    write_json(json_path, {
-        "callId": report.call_id,
-        "lang": report.language,
-        "durationSec": report.duration_sec,
-        "scores": {
-            "empathy": report.scores.empathy,
-            "compliance": report.scores.compliance,
-            "structure": report.scores.structure,
-        },
-        "operational": {
-            "silencePct": report.operational.silence_pct,
-            "overlapPct": report.operational.overlap_pct,
-            "speechRateWpm": report.operational.speech_rate_wpm,
-            "interruptions": report.operational.interruptions,
-        },
-        "checklist": report.scores.checklist,
-        "highlights": report.scores.highlights,
-    })
-
-    html_path = output_dir / "report.html"
-    html_path.parent.mkdir(parents=True, exist_ok=True)
-    html_path.write_text(
-        "<html><body><h1>Call Report</h1>"
-        f"<p>Call ID: {report.call_id}</p>"
-        f"<p>Language: {report.language}</p>"
-        f"<p>Empathy: {report.scores.empathy}</p>"
-        f"<p>Compliance: {report.scores.compliance}</p>"
-        f"<p>Structure: {report.scores.structure}</p>"
-        "</body></html>"
-    )
-
-    context.log("pipeline_complete", call_id=call_id, json=str(json_path), html=str(html_path))
-    print(f"OK  callId={call_id}")
-    print(f"JSON  {json_path}")
-    print(f"HTML  {html_path}")
+    print(f"OK  callId={result.call_id}")
+    print(f"JSON  {result.json_path}")
+    print(f"HTML  {result.html_path}")
 
 
 if __name__ == "__main__":

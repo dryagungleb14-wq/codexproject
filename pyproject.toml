@@ -18,6 +18,11 @@ pipeline = [
     "torchaudio>=2.0.0",
     "librosa>=0.10.0"
 ]
+web = [
+    "fastapi>=0.112.0",
+    "uvicorn[standard]>=0.30.0",
+    "python-multipart>=0.0.9"
+]
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
