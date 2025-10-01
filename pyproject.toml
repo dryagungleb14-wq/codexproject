@@ -1,29 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "codex-call-audit"
+name = "new_project"
 version = "0.1.0"
-description = "Offline call quality assessment pipeline"
-authors = [{ name = "Codex AI" }]
-requires-python = ">=3.10"
-dependencies = [
-    "google-genai>=0.3.0",
-    "pydantic>=2.6.0",
-    "python-dotenv>=1.0.0"
+description = ""
+authors = [
+  { name = "Your Name", email = "you@example.com" }
 ]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
 
 [project.optional-dependencies]
-pipeline = [
-    "faster-whisper>=1.0.0",
-    "pyannote.audio>=3.0.0",
-    "soundfile>=0.12.1",
-    "torchaudio>=2.0.0",
-    "librosa>=0.10.0"
-]
-web = [
-    "fastapi>=0.111.0",
-    "uvicorn[standard]>=0.24.0",
-    "python-multipart>=0.0.9"
-]
+# Пример: dev = ["pytest", "ruff"]
 
-[build-system]
-requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
